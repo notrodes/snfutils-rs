@@ -1,2 +1,8 @@
 dir
 *.o
+.sfnutils.code-workspace
+
+#Added by cargo
+
+/target
+/.vscode
