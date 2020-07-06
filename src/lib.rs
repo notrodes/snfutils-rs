@@ -2,14 +2,14 @@ mod tracker;
 mod conversion;
 use tracker::NameTracker;
 pub struct EightPointThreeName {
-    lfnname: String,
+    long_name: String,
     short_name: String,
-    first_six: String,
+    first_six_chars: String,
     file_extension: String,
 }
 
 impl EightPointThreeName {
     pub fn from(name: String) -> EightPointThreeName {
-        conversion::convert(name, NameTracker::new())
+        conversion::convert(name, &mut NameTracker::new())
     }
 }
