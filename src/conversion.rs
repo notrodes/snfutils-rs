@@ -1,7 +1,7 @@
 use crate::EightPointThreeName;
 use crate::NameTracker;
 
-pub fn convert(name: String, tracking: NameTracker) -> EightPointThreeName {
+pub fn convert(name: String, mut tracking: NameTracker) -> EightPointThreeName {
     let mut sections: Vec<String> = name.rsplitn(2, '.').map(|p| String::from(p)).collect();
     sections.reverse();
     for section in &mut sections {
@@ -20,12 +20,19 @@ pub fn convert(name: String, tracking: NameTracker) -> EightPointThreeName {
     sections[1].truncate(3);
     let mut first_six = sections[0].clone();
     first_six.truncate(6);
-    EightPointThreeName {
+    let mut name = EightPointThreeName {
         lfnname: name,
         short_name: format!("{}.{}", sections[0], sections[1]),
         first_six: first_six,
         file_extension: sections[1].clone(),
+    };
+    tracking.register(&name);
+    
+    if  tracking.get(&name).unwrap() > 5 {
+        let new_name = format!("~{}", tracking.get(&name).unwrap());
+        name.short_name = name.first_six.clone() + &new_name;
     }
+    name
 }
 
 #[cfg(test)]

@@ -12,7 +12,11 @@ impl NameTracker {
         NameTracker { tracked: HashMap::new() }
     }
 
-    pub fn find_value(&self, registrar: &EightPointThreeName) -> Option<u32> {
+    pub fn contains(&self, registrar: &EightPointThreeName) -> bool {
+        self.tracked.contains_key(&registrar.first_six)
+    }
+
+    pub fn get(&self, registrar: &EightPointThreeName) -> Option<u32> {
         match self.tracked.get(&registrar.first_six) {
             Some(&value) => Some(value),
             None => None,
