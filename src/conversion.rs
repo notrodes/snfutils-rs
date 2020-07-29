@@ -2,7 +2,7 @@ use crate::EightPointThreeName;
 use crate::NameTracker;
 
 pub fn convert(name: String, tracking: &mut NameTracker) -> EightPointThreeName {
-    let mut sections: Vec<String> = name.rsplitn(2, '.').map(|p| String::from(p)).collect();
+    let mut sections: Vec<String> = name.rsplitn(2, '.').map(String::from).collect();
     sections.reverse();
     for section in &mut sections {
         *section = section
@@ -20,12 +20,17 @@ pub fn convert(name: String, tracking: &mut NameTracker) -> EightPointThreeName 
         short_name: format!("{}.{}", sections[0], sections[1]),
         first_six_chars: first_six,
         file_extension: sections[1].clone(),
+        handle: str::parse(&format!("{}{}", tracking.len(), tracking.get_vec(&name).len())).unwrap()
     };
-    tracking.register(&name);
+    tracking.register(name);
 
-    if tracking.get(&name).unwrap() >= 6 {
-        let new_name = format!("~{}", tracking.get(&name).unwrap());
-        name.short_name = format!("{}.{}", name.first_six_chars.clone() + &new_name, name.file_extension);
+    if tracking.get_vec(&name).len() >= 6 {
+        let new_name = format!("~{:?}", tracking.get_vec(&name).len());
+        name.short_name = format!(
+            "{}.{}",
+            name.first_six_chars.clone() + &new_name,
+            name.file_extension
+        );
     }
     name
 }
@@ -58,6 +63,5 @@ mod tests {
             let converted = convert("ABCDEFGH.TXT".to_string(), &mut tracker);
             assert_eq!(converted.short_name, format!("ABCDEF~{}.TXT", i));
         }
-        
     }
 }
