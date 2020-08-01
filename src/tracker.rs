@@ -1,11 +1,9 @@
-use std::collections::hash_map::Entry::{Occupied, Vacant};
+use crate::eight_point_three_name::EightPointThreeName;
 use std::collections::HashMap;
-
-use crate::EightPointThreeName;
 
 #[derive(Debug)]
 pub struct NameTracker {
-    tracked: HashMap<String, Vec<EightPointThreeName>>,
+    tracked: HashMap<String, u8>,
 }
 
 impl NameTracker {
@@ -19,54 +17,48 @@ impl NameTracker {
         self.tracked.len()
     }
 
-    pub fn register(&mut self, registrar: EightPointThreeName) {
-        match self.tracked.get_mut(&registrar.first_six_chars) {
-            Some(names) => names.push(registrar),
-            None => {
+    pub fn register(&mut self, registrar: &EightPointThreeName) {
+        match self.tracked.get(&registrar.first_six_chars).to_owned() {
+            Some(&names) => {
                 self.tracked
-                    .insert(registrar.first_six_chars.clone(), vec![registrar]);
+                    .insert(registrar.first_six_chars.clone(), names + 1);
+            }
+            None => {
+                self.tracked.insert(registrar.first_six_chars.clone(), 1);
             }
         }
     }
-    pub fn get_vec(&self, registrar: &EightPointThreeName) -> &Vec<EightPointThreeName> {
-        self.tracked.get(&registrar.first_six_chars).unwrap()
-    }
 
-    pub fn contains(&mut self, registrar: &EightPointThreeName) -> bool {
-        match self.tracked.entry(registrar.first_six_chars.clone()) {
-            Occupied(name_list) => {
-                let name_list = name_list.get();
-                name_list.contains(registrar)
-            }
-            Vacant(_) => false,
+    pub fn get(&self, registrar: &EightPointThreeName) -> Option<u8> {
+        match self.tracked.get(&registrar.first_six_chars) {
+            Some(&count) => Some(count),
+            None => None,
         }
     }
 
-    pub fn remove(&mut self, registrar: EightPointThreeName) {
-        let entries = self.tracked.get_mut(&registrar.first_six_chars).unwrap();
-        match entries.len() {
-            1 => {
-                self.tracked.remove(&registrar.first_six_chars).unwrap();
+    pub fn remove(&mut self, registrar: &EightPointThreeName) -> Result<(), &str> {
+        match self.tracked.get(&registrar.first_six_chars) {
+            Some(&value) => {
+                self.tracked
+                    .insert(registrar.first_six_chars.clone(), value - 1);
+                Ok(())
             }
-            _ => {
-                entries.remove(entries.binary_search(&registrar).unwrap());
-            }
-        };
+            None => Err("No name with first six characters registered"),
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::eight_point_three_name::EightPointThreeName;
     use crate::tracker::NameTracker;
-    use crate::EightPointThreeName;
 
-    fn debug_obj_maker() -> EightPointThreeName {
+    fn debug_obj_maker(first_six_chars: String) -> EightPointThreeName {
         EightPointThreeName {
             long_name: String::new(),
             short_name: String::new(),
-            first_six_chars: String::from("ABCD"),
+            first_six_chars,
             file_extension: String::new(),
-            // handle: [0, 0]
         }
     }
 
@@ -75,12 +67,22 @@ mod tests {
         NameTracker::new();
     }
 
-    /*    #[test]
-    fn test_register() {
+    #[test]
+    fn test_len() {
         let mut tracker = NameTracker::new();
-        for _i in 0..2 {
-            tracker.register(debug_obj_maker());
+        for i in 1..=10 {
+            println!("{}", i);
+            tracker.register(&debug_obj_maker(i.to_string()));
+            assert_eq!(tracker.len(), i);
         }
-        assert_eq!(tracker.tracked, )
-    }*/
+    }
 }
+
+/*    #[test]
+fn test_register() {
+    let mut tracker = NameTracker::new();
+    for _i in 0..2 {
+        tracker.register(debug_obj_maker());
+    }
+    assert_eq!(tracker.tracked, )
+}*/

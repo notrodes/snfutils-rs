@@ -1,28 +1,42 @@
-use crate::EightPointThreeName;
-use crate::NameTracker;
+use crate::eight_point_three_name::EightPointThreeName;
+use crate::tracker::NameTracker;
+
+// Character blacklist
+const FILTER_PATTERN: [char; 17] = [
+    '"', '\'', '*', '+', ',', '/', ':', ';', '<', '=', '>', '?', '\\', '[', ']', '|', ']',
+];
 
 pub fn convert(name: String, tracking: &mut NameTracker) -> EightPointThreeName {
     let mut sections: Vec<String> = name.rsplitn(2, '.').map(String::from).collect();
     sections.reverse();
     for section in &mut sections {
-        *section = section
-            .to_ascii_uppercase()
-            .chars()
-            .filter(|p| p.is_ascii() && !p.is_whitespace() && !(*p == '.'))
-            .collect::<String>();
+        section.retain(|p| p.is_ascii() && !FILTER_PATTERN.contains(&p));
+        section.make_ascii_uppercase();
     }
-    sections[0].truncate(8);
     sections[1].truncate(3);
-    let mut first_six = sections[0].clone();
-    first_six.truncate(6);
-    let name = EightPointThreeName {
+    let first_six_chars = sections[0]
+        .get(0..6)
+        .unwrap_or_else(|| &sections[0])
+        .to_string();
+    let mut name = EightPointThreeName {
         long_name: name,
-        short_name: format!("{}.{}", sections[0], sections[1]),
-        first_six_chars: first_six,
+        short_name: String::with_capacity(12),
+        first_six_chars: first_six_chars.clone(),
         file_extension: sections[1].clone(),
     };
-    tracking.register(name.clone());
-    name
+    tracking.register(&name);
+    if sections[0].len() > 8 {
+        name.short_name = format!(
+            "{}~{}.{}",
+            first_six_chars,
+            tracking.get(&name).unwrap(),
+            name.file_extension
+        );
+        name
+    } else {
+        name.short_name = format!("{}.{}", sections[0].clone(), name.file_extension);
+        name
+    }
 }
 
 #[cfg(test)]
@@ -36,22 +50,26 @@ mod tests {
             "ABCDEFGH.TXT",
             "abcdefgh.TXT",
             "ÄABCDEFGH.TXT",
-            "ABCDEFGHIJ.TXT",
-            "ABCDEFGHI.TXTABCD",
+            "ABCDEFGH.TXTABCD",
+            "A+BCDEFGH.TXT",
         ];
+        println!("Test formatting conversion");
         for name in FILE_NAMES.iter() {
             let converted = convert(name.to_string(), &mut NameTracker::new());
             println!("{}", converted.short_name);
             assert_eq!(converted.short_name, "ABCDEFGH.TXT");
         }
+        print!("\n");
     }
 
     #[test]
     fn test_name_change() {
+        println!("Test name over eight characters conversion");
         let mut tracker = NameTracker::new();
         for i in 1..=6 {
-            let mut converted = convert("ABCDEFGH.TXT".to_string(), &mut tracker);
-            assert_eq!(converted.get_short_name(&tracker), format!("ABCDEF~{}.TXT", i));
+            let converted = convert("ABCDEFGHI.TXT".to_string(), &mut tracker);
+            println!("{}", converted.short_name);
+            assert_eq!(converted.short_name, format!("ABCDEF~{}.TXT", i));
         }
     }
 }
