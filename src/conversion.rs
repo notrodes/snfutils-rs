@@ -15,23 +15,13 @@ pub fn convert(name: String, tracking: &mut NameTracker) -> EightPointThreeName 
     sections[1].truncate(3);
     let mut first_six = sections[0].clone();
     first_six.truncate(6);
-    let mut name = EightPointThreeName {
+    let name = EightPointThreeName {
         long_name: name,
         short_name: format!("{}.{}", sections[0], sections[1]),
         first_six_chars: first_six,
         file_extension: sections[1].clone(),
-        handle: str::parse(&format!("{}{}", tracking.len(), tracking.get_vec(&name).len())).unwrap()
     };
-    tracking.register(name);
-
-    if tracking.get_vec(&name).len() >= 6 {
-        let new_name = format!("~{:?}", tracking.get_vec(&name).len());
-        name.short_name = format!(
-            "{}.{}",
-            name.first_six_chars.clone() + &new_name,
-            name.file_extension
-        );
-    }
+    tracking.register(name.clone());
     name
 }
 
@@ -60,8 +50,8 @@ mod tests {
     fn test_name_change() {
         let mut tracker = NameTracker::new();
         for i in 1..=6 {
-            let converted = convert("ABCDEFGH.TXT".to_string(), &mut tracker);
-            assert_eq!(converted.short_name, format!("ABCDEF~{}.TXT", i));
+            let mut converted = convert("ABCDEFGH.TXT".to_string(), &mut tracker);
+            assert_eq!(converted.get_short_name(&tracker), format!("ABCDEF~{}.TXT", i));
         }
     }
 }

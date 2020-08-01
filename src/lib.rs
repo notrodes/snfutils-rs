@@ -7,11 +7,23 @@ pub struct EightPointThreeName {
     short_name: String,
     first_six_chars: String,
     file_extension: String,
-    handle: u32
 }
 
 impl EightPointThreeName {
     pub fn from(name: String) -> EightPointThreeName {
-        conversion::convert(name, &mut NameTracker::new())
+        conversion::convert(name, &mut NameTracker::new()).clone()
+    }
+
+    pub fn get_short_name(&mut self, tracking: &NameTracker) -> String {
+        let number_of_siblings = tracking.get_vec(self).len();
+        if number_of_siblings <= 6 {
+            self.short_name = format!(
+                "{}~{}.{}",
+                self.first_six_chars.clone(),
+                number_of_siblings,
+                self.file_extension
+            )
+        }
+        self.short_name.clone()
     }
 }
