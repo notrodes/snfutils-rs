@@ -1,5 +1,5 @@
-use crate::eight_point_three_name::EightPointThreeName;
 use crate::tracker::NameTracker;
+use crate::EightPointThreeName;
 
 // Character blacklist
 const FILTER_PATTERN: [char; 17] = [
@@ -71,5 +71,6 @@ mod tests {
             println!("{}", converted.short_name);
             assert_eq!(converted.short_name, format!("ABCDEF~{}.TXT", i));
         }
+        print!("\n");
     }
 }

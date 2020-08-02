@@ -1,4 +1,4 @@
-use crate::eight_point_three_name::EightPointThreeName;
+use crate::EightPointThreeName;
 use std::collections::HashMap;
 
 #[derive(Debug)]
@@ -50,8 +50,8 @@ impl NameTracker {
 
 #[cfg(test)]
 mod tests {
-    use crate::eight_point_three_name::EightPointThreeName;
     use crate::tracker::NameTracker;
+    use crate::EightPointThreeName;
 
     fn debug_obj_maker(first_six_chars: String) -> EightPointThreeName {
         EightPointThreeName {
@@ -69,12 +69,14 @@ mod tests {
 
     #[test]
     fn test_len() {
+        println!("Test the len function of tracker");
         let mut tracker = NameTracker::new();
         for i in 1..=10 {
-            println!("{}", i);
+            println!("Testing length {}", i);
             tracker.register(&debug_obj_maker(i.to_string()));
             assert_eq!(tracker.len(), i);
         }
+        print!("\n")
     }
 }
 
