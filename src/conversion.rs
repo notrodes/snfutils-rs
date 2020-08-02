@@ -2,8 +2,8 @@ use crate::tracker::NameTracker;
 use crate::EightPointThreeName;
 
 // Character blacklist
-const FILTER_PATTERN: [char; 17] = [
-    '"', '\'', '*', '+', ',', '/', ':', ';', '<', '=', '>', '?', '\\', '[', ']', '|', ']',
+const FILTER_PATTERN: [char; 16] = [
+    '"', '\'', '*', ',', '/', ':', ';', '<', '=', '>', '?', '\\', '[', ']', '|', ']',
 ];
 
 pub fn convert(name: String, tracking: &mut NameTracker) -> EightPointThreeName {
@@ -13,18 +13,12 @@ pub fn convert(name: String, tracking: &mut NameTracker) -> EightPointThreeName 
         section.retain(|p| p.is_ascii() && !FILTER_PATTERN.contains(&p));
         section.make_ascii_uppercase();
     }
-    let space;
-    let file_extension = match sections.get(1) {
-        Some(ext) => {
-            space = " ";
-            let mut ext = ext.clone();
-            ext.truncate(3);
-            Some(ext)
+    let file_extension: Option<String> = match sections.get_mut(1) {
+        Some(mut extension) => {
+            extension.truncate(3);
+            Some(" ".to_string() + extension)
         }
-        None => {
-            space = "";
-            None
-        }
+        None => None,
     };
     let first_six_chars = sections[0]
         .get(0..6)
@@ -40,22 +34,19 @@ pub fn convert(name: String, tracking: &mut NameTracker) -> EightPointThreeName 
 
     if sections[0].len() > 8 {
         name.short_name = format!(
-            "{}~{}{}{}",
+            "{}~{}{}",
             first_six_chars,
             tracking.get(&name).unwrap(),
-            space,
             name.file_extension.clone().unwrap_or_default()
         );
-        name
     } else {
         name.short_name = format!(
-            "{}{}{}",
+            "{}{}",
             sections[0].clone(),
-            space,
             name.file_extension.clone().unwrap_or_default()
         );
-        name
     }
+    name
 }
 
 #[cfg(test)]
@@ -95,7 +86,9 @@ mod tests {
 
     #[test]
     fn test_no_extension() {
-        println!("Test no extension in conversion\n");
-        convert("ABCDEFGHI".to_string(), &mut NameTracker::new());
+        println!("Test no extension in conversion");
+        let test = "ABCDEFGHI".to_string();
+        let convert = convert(test, &mut NameTracker::new());
+        assert_eq!(convert.short_name, test)
     }
 }
