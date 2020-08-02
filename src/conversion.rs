@@ -13,8 +13,8 @@ pub fn convert(name: String, tracking: &mut NameTracker) -> EightPointThreeName 
         section.retain(|p| p.is_ascii() && !FILTER_PATTERN.contains(&p));
         section.make_ascii_uppercase();
     }
-    let file_extension: Option<String> = match sections.get_mut(1) {
-        Some(mut extension) => {
+    let file_extension = match sections.get_mut(1) {
+        Some(extension) => {
             extension.truncate(3);
             Some(" ".to_string() + extension)
         }
@@ -61,7 +61,7 @@ mod tests {
             "abcdefgh.TXT",
             "ÄABCDEFGH.TXT",
             "ABCDEFGH.TXTABCD",
-            "A+BCDEFGH.TXT",
+            "A\\BCDEFGH.TXT",
         ];
         println!("Test formatting conversion");
         for name in FILE_NAMES.iter() {
@@ -87,8 +87,8 @@ mod tests {
     #[test]
     fn test_no_extension() {
         println!("Test no extension in conversion");
-        let test = "ABCDEFGHI".to_string();
-        let convert = convert(test, &mut NameTracker::new());
+        let test = "ABCDEFGH".to_string();
+        let convert = convert(test.clone(), &mut NameTracker::new());
         assert_eq!(convert.short_name, test)
     }
 }
