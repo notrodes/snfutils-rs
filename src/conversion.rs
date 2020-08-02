@@ -13,13 +13,18 @@ pub fn convert(name: String, tracking: &mut NameTracker) -> EightPointThreeName 
         section.retain(|p| p.is_ascii() && !FILTER_PATTERN.contains(&p));
         section.make_ascii_uppercase();
     }
+    let period;
     let file_extension = match sections.get(1) {
         Some(ext) => {
+            period = ".";
             let mut ext = ext.clone();
             ext.truncate(3);
             Some(ext)
         }
-        None => None,
+        None => {
+            period = "";
+            None
+        }
     };
     let first_six_chars = sections[0]
         .get(0..6)
@@ -32,18 +37,21 @@ pub fn convert(name: String, tracking: &mut NameTracker) -> EightPointThreeName 
         file_extension,
     };
     tracking.register(&name);
+
     if sections[0].len() > 8 {
         name.short_name = format!(
-            "{}~{}.{}",
+            "{}~{}{}{}",
             first_six_chars,
             tracking.get(&name).unwrap(),
+            period,
             name.file_extension.clone().unwrap_or_default()
         );
         name
     } else {
         name.short_name = format!(
-            "{}.{}",
+            "{}{}{}",
             sections[0].clone(),
+            period,
             name.file_extension.clone().unwrap_or_default()
         );
         name

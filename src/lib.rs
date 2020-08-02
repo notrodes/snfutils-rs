@@ -7,7 +7,7 @@ use tracker::NameTracker;
 pub struct EightPointThreeName {
     pub long_name: String,
     pub short_name: String,
-    pub first_six_chars: String,
+    first_six_chars: String,
     pub file_extension: Option<String>,
 }
 
