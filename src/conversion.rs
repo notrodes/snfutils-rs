@@ -13,16 +13,16 @@ pub fn convert(name: String, tracking: &mut NameTracker) -> EightPointThreeName 
         section.retain(|p| p.is_ascii() && !FILTER_PATTERN.contains(&p));
         section.make_ascii_uppercase();
     }
-    let period;
+    let space;
     let file_extension = match sections.get(1) {
         Some(ext) => {
-            period = ".";
+            space = " ";
             let mut ext = ext.clone();
             ext.truncate(3);
             Some(ext)
         }
         None => {
-            period = "";
+            space = "";
             None
         }
     };
@@ -43,7 +43,7 @@ pub fn convert(name: String, tracking: &mut NameTracker) -> EightPointThreeName 
             "{}~{}{}{}",
             first_six_chars,
             tracking.get(&name).unwrap(),
-            period,
+            space,
             name.file_extension.clone().unwrap_or_default()
         );
         name
@@ -51,7 +51,7 @@ pub fn convert(name: String, tracking: &mut NameTracker) -> EightPointThreeName 
         name.short_name = format!(
             "{}{}{}",
             sections[0].clone(),
-            period,
+            space,
             name.file_extension.clone().unwrap_or_default()
         );
         name
@@ -76,7 +76,7 @@ mod tests {
         for name in FILE_NAMES.iter() {
             let converted = convert(name.to_string(), &mut NameTracker::new());
             println!("{}", converted.short_name);
-            assert_eq!(converted.short_name, "ABCDEFGH.TXT");
+            assert_eq!(converted.short_name, "ABCDEFGH TXT");
         }
         print!("\n");
     }
@@ -88,7 +88,7 @@ mod tests {
         for i in 1..=6 {
             let converted = convert("ABCDEFGHI.TXT".to_string(), &mut tracker);
             println!("{}", converted.short_name);
-            assert_eq!(converted.short_name, format!("ABCDEF~{}.TXT", i));
+            assert_eq!(converted.short_name, format!("ABCDEF~{} TXT", i));
         }
         print!("\n");
     }
