@@ -18,7 +18,7 @@ impl NameTracker {
     }
 
     pub fn register(&mut self, registrar: &EightPointThreeName) {
-        match self.tracked.get(&registrar.first_six_chars).to_owned() {
+        match self.tracked.get(&registrar.first_six_chars).clone() {
             Some(&names) => {
                 self.tracked
                     .insert(registrar.first_six_chars.clone(), names + 1);
@@ -58,7 +58,7 @@ mod tests {
             long_name: String::new(),
             short_name: String::new(),
             first_six_chars,
-            file_extension: String::new(),
+            file_extension: Some(String::new()),
         }
     }
 

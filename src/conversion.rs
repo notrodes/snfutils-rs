@@ -13,7 +13,14 @@ pub fn convert(name: String, tracking: &mut NameTracker) -> EightPointThreeName 
         section.retain(|p| p.is_ascii() && !FILTER_PATTERN.contains(&p));
         section.make_ascii_uppercase();
     }
-    sections[1].truncate(3);
+    let file_extension = match sections.get(1) {
+        Some(ext) => {
+            let mut ext = ext.clone();
+            ext.truncate(3);
+            Some(ext)
+        }
+        None => None,
+    };
     let first_six_chars = sections[0]
         .get(0..6)
         .unwrap_or_else(|| &sections[0])
@@ -22,7 +29,7 @@ pub fn convert(name: String, tracking: &mut NameTracker) -> EightPointThreeName 
         long_name: name,
         short_name: String::with_capacity(12),
         first_six_chars: first_six_chars.clone(),
-        file_extension: sections[1].clone(),
+        file_extension,
     };
     tracking.register(&name);
     if sections[0].len() > 8 {
@@ -30,11 +37,15 @@ pub fn convert(name: String, tracking: &mut NameTracker) -> EightPointThreeName 
             "{}~{}.{}",
             first_six_chars,
             tracking.get(&name).unwrap(),
-            name.file_extension
+            name.file_extension.clone().unwrap_or_default()
         );
         name
     } else {
-        name.short_name = format!("{}.{}", sections[0].clone(), name.file_extension);
+        name.short_name = format!(
+            "{}.{}",
+            sections[0].clone(),
+            name.file_extension.clone().unwrap_or_default()
+        );
         name
     }
 }
@@ -72,5 +83,11 @@ mod tests {
             assert_eq!(converted.short_name, format!("ABCDEF~{}.TXT", i));
         }
         print!("\n");
+    }
+
+    #[test]
+    fn test_no_extension() {
+        println!("Test no extension in conversion\n");
+        convert("ABCDEFGHI".to_string(), &mut NameTracker::new());
     }
 }

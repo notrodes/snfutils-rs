@@ -8,11 +8,11 @@ pub struct EightPointThreeName {
     pub long_name: String,
     pub short_name: String,
     pub first_six_chars: String,
-    pub file_extension: String,
+    pub file_extension: Option<String>,
 }
 
 pub fn from(name: String) -> EightPointThreeName {
-    conversion::convert(name, &mut NameTracker::new()).clone()
+    conversion::convert(name, &mut NameTracker::new())
 }
 
 pub fn from_with_tracker(name: String, mut tracker: &mut NameTracker) -> EightPointThreeName {
