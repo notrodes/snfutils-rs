@@ -16,7 +16,7 @@ pub fn convert(name: String, tracking: &mut NameTracker) -> EightPointThreeName 
     let file_extension = match sections.get_mut(1) {
         Some(extension) => {
             extension.truncate(3);
-            Some(" ".to_string() + extension)
+            Some(extension.to_string())
         }
         None => None,
     };
@@ -26,26 +26,18 @@ pub fn convert(name: String, tracking: &mut NameTracker) -> EightPointThreeName 
         .to_string();
     let mut name = EightPointThreeName {
         long_name: name,
-        short_name: String::with_capacity(12),
+        short_name: sections[0].clone(),
         first_six_chars: first_six_chars.clone(),
         file_extension,
     };
     tracking.register(&name);
-
     if sections[0].len() > 8 {
-        name.short_name = format!(
-            "{}~{}{}",
-            first_six_chars,
-            tracking.get(&name).unwrap(),
-            name.file_extension.clone().unwrap_or_default()
-        );
-    } else {
-        name.short_name = format!(
-            "{}{}",
-            sections[0].clone(),
-            name.file_extension.clone().unwrap_or_default()
-        );
+        name.short_name = format!("{}~{}", first_six_chars, tracking.get(&name).unwrap());
     }
+    name.short_name = match &name.file_extension {
+        Some(file_extension) => format!("{} {}", name.short_name, file_extension),
+        None => name.short_name,
+    };
     name
 }
 
